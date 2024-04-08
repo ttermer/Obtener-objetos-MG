@@ -9,20 +9,22 @@ def filtrar_elementos(lista):
     regex = re.compile(r'^(?!.*(?:_on|_so|_fla|.swf|header|formas|sprites|textos|sonidos|fuentes|marcos|scenes|otros|scripts|<default package>|Asset)$).*$', re.IGNORECASE)
     return [elemento for elemento in lista if regex.match(elemento)]
 
-def crear_lineas(lista_filtrada, prefijo):
+def crear_lineas(lista_filtrada, prefijo, cantidad):
     '''Recibe una lista filtrada y un prefijo y devuelve otra lista formateada para ser utilizada en un NPC con todos los elementos de la lista filtrada.'''
     lines = ["initial: DO\n    on activate A1\n\n"]
     for i, elemento in enumerate(lista_filtrada, start=1):
-        lines.append(f"A{i}: DO\n    user.state get\n    inventory.add 1 {prefijo}.{elemento}\n    after 1 A{i+1}\n\n")
+        lines.append(f"A{i}: DO\n    user.state get\n    inventory.add {cantidad} {prefijo}.{elemento}\n    after 1 A{i+1}\n\n")
     return lines
 
 def mostrar_salida(prefijo):
-    '''Utiliza la funcion de filtro y la funcion de formateo y lo muestra en la caja de texto llamada salida_text'''
+    '''Utiliza la función de filtro y la función de formateo y lo muestra en la caja de texto llamada salida_text'''
     lista_filtrada = filtrar_elementos(lista_objetos)
-    output_lines = crear_lineas(lista_filtrada, prefijo)
+    cantidad = cantidad_spinbox.get()  # Obtener la cantidad desde un campo de entrada
+    output_lines = crear_lineas(lista_filtrada, prefijo, cantidad)
     salida_text.delete("1.0", tk.END)
     salida_text.insert(tk.END, '\n'.join(output_lines))
     info_label.config(text="Encode preparado, copia y pega en BASE64")
+
 
 def guardar_contenido():
     '''Toma lo que esta dentro de la primer caja de texto llamada TEXTO y lo guarda en lista_objetos'''
@@ -37,6 +39,7 @@ def copiar_contenido():
 
 root = tk.Tk()
 root.title("Obtener colecciones BY: TERMER")
+root.iconbitmap("")
 root.configure(bg="orange3")
 
 # Parte superior del GUI
@@ -55,6 +58,12 @@ prefijo_label.pack(side=tk.LEFT, padx=5, pady=5)
 
 prefijo_entry = tk.Entry(root)
 prefijo_entry.pack(side=tk.LEFT, padx=5, pady=5)
+
+cantidad_label = tk.Label(root, text="Cantidad:", bg="gold")
+cantidad_label.pack(side=tk.LEFT, padx=5, pady=5)
+
+cantidad_spinbox = tk.Spinbox(root, from_=1, to=10000)  
+cantidad_spinbox.pack(side=tk.LEFT, padx=5, pady=5)
 
 boton_main = tk.Button(root, text="Crear encode", command=lambda: mostrar_salida(prefijo_entry.get()), bg="light goldenrod", fg="black")
 boton_main.pack(side=tk.LEFT, padx=5, pady=5)
